@@ -14,6 +14,45 @@ def read_input(filepath="example.input"):
 
     return data_list
 
+
+def mergeSort(alist, member=0):
+    """
+    Implementation found at:
+    http://interactivepython.org/courselib/static/pythonds/SortSearch/TheMergeSort.html
+
+    Adapted to take list of tuples and sort given member.
+    """
+    if len(alist)>1:
+        mid = len(alist)//2
+        lefthalf = alist[:mid]
+        righthalf = alist[mid:]
+
+        mergeSort(lefthalf, member)
+        mergeSort(righthalf, member)
+
+        i=0
+        j=0
+        k=0
+        while i < len(lefthalf) and j < len(righthalf):
+            if lefthalf[i][member] < righthalf[j][member]:
+                alist[k]=lefthalf[i]
+                i=i+1
+            else:
+                alist[k]=righthalf[j]
+                j=j+1
+            k=k+1
+
+        while i < len(lefthalf):
+            alist[k]=lefthalf[i]
+            i=i+1
+            k=k+1
+
+        while j < len(righthalf):
+            alist[k]=righthalf[j]
+            j=j+1
+            k=k+1
+
+
 def brute_force(data):
     smallest_distance = None
     points = []
@@ -30,27 +69,46 @@ def brute_force(data):
 
     return smallest_distance, points
 
+
 def naive(data):
     n = len(data)
     smallest_distance = None
     points = []
-    if n <= 3:
-        for x1, y1 in data:
-            for x2, y2 in data:
-                result = hypot(x2 - x1, y2 - y1)
-                if result != 0:
-                    if result < smallest_distance or smallest_distance is None:
-                        smallest_distance = result
-                        points = [((x1, y1), (x2, y2))]
-                    elif result == smallest_distance:
-                        if ((x2, y2), (x1, y1)) not in points:
-                            points.append(((x1, y1), (x2, y2)))
+    if n == 2:
+        # if there are only two points return them - O(n)
+        x1, y1 = data[0]
+        x2, y2 = data[1]
+        smallest_distance = hypot(x2 - x1, y2 - y1)
+        points = [(data[0], data[1])]
+    elif n == 3:
+        # if there are only three points return best of three - O(n)
+        x1, y1 = data[0]
+        x2, y2 = data[1]
+        x3, y3 = data[2]
+        result1 = hypot(x2 - x1, y2 - y1)
+        result2 = hypot(x2 - x3, y2 - y3)
+        result3 = hypot(x1 - x3, y1 - y3)
+        smallest_distance = min(result1, result2, result3)
+        if smallest_distance == result1:
+            points = [(data[0], data[1])]
+        elif smallest_distance == result2:
+            points = [(data[1], data[2])]
+        else:
+            points = [(data[0], data[2])]
     else:
+        # sort by y coordinate - O(log n)
+        mergeSort(data, 1)
+
+        # split data in half - O(n)
         m = n/2
-        data1 = data[:m]
-        data2 = data[m:]
-        distance1, points1 = naive(data1)
-        distance2, points2 = naive(data2)
+        left = data[:m]
+        right = data[m:]
+
+        # recurse
+        distance1, points1 = naive(left)
+        distance2, points2 = naive(right)
+
+        # combine - O(n)
         if distance1 == distance2:
             smallest_distance = distance1
             points = points1 + points2
@@ -61,15 +119,30 @@ def naive(data):
             smallest_distance = distance1
             points = points1
 
+        # check cross pairs - O((n/2)^2)
+        for x1, y1 in left:
+            for x2, y2 in right:
+                result = hypot(x2 - x1, y2 - y1)
+                if result < smallest_distance:
+                    smallest_distance = result
+                    points = [((x1, y1), (x2, y2))]
+                elif result == smallest_distance:
+                    points += [((x1, y1), (x2, y2))]
+
     return smallest_distance, points
+
 
 if __name__ == "__main__":
     data = read_input()
-    start = time.time()
-    output = naive(data)
-    stop = time.time()
-    print "Completed in:", stop-start
 
+    print "----- Brute Force -----"
+    output = brute_force(data)
+    print output[0]
+    for pair1, pair2 in output[1]:
+        print pair1, pair2
+
+    print "----- Naive -----"
+    output = naive(data)
     print output[0]
     for pair1, pair2 in output[1]:
         print pair1, pair2
