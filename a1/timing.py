@@ -15,7 +15,7 @@ if __name__ == "__main__":
     naive_times = []
     enhanced_times = []
 
-    for i in range(1, 6):
+    for i in range(1, 5):
         data = []
         for j in range(0, pow(10, i)):
             while True:

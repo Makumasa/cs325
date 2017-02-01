@@ -12,8 +12,9 @@ if __name__ == "__main__":
     data = read_input()
 
     output = brute_force(data)
+    points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
-    for pair1, pair2 in output[1]:
+    for pair1, pair2 in points:
         print pair1, pair2
 
 

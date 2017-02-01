@@ -223,18 +223,21 @@ if __name__ == "__main__":
 
     print "----- Brute Force -----"
     output = brute_force(data)
+    points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
-    for pair1, pair2 in output[1]:
+    for pair1, pair2 in points:
         print pair1, pair2
 
     print "----- Naive -----"
     output = naive(data)
+    points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
-    for pair1, pair2 in output[1]:
+    for pair1, pair2 in points:
         print pair1, pair2
 
     print "----- Enhanced -----"
     output = enhanced(data)
+    points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
-    for pair1, pair2 in output[1]:
+    for pair1, pair2 in points:
         print pair1, pair2
