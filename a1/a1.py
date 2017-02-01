@@ -70,6 +70,7 @@ def brute_force(data):
     return smallest_distance, points
 
 
+# TODO: Specify that data will be sorted by X in docstring
 def naive(data):
     n = len(data)
     smallest_distance = None
@@ -117,6 +118,7 @@ def naive(data):
             points = points1
 
         # check cross pairs - O((n/2)^2)
+        # TODO: use closest_cross_pair instead
         for x1, y1 in left:
             for x2, y2 in right:
                 result = hypot(x2 - x1, y2 - y1)
@@ -129,6 +131,7 @@ def naive(data):
     return smallest_distance, points
 
 
+# TODO: should take two inputs, data sorted by x, and data sorted by y
 def enhanced(data):
     n = len(data)
     smallest_distance = None
@@ -217,7 +220,6 @@ def closest_cross_pair(data, start):
 
     return d_m, points
 
-# TODO: sort output
 if __name__ == "__main__":
     data = read_input()
 
@@ -229,6 +231,7 @@ if __name__ == "__main__":
         print pair1, pair2
 
     print "----- Naive -----"
+    # TODO: Sort data by X
     output = naive(data)
     points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
@@ -236,6 +239,7 @@ if __name__ == "__main__":
         print pair1, pair2
 
     print "----- Enhanced -----"
+    # TODO: Sort data by X and Y
     output = enhanced(data)
     points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
