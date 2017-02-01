@@ -75,13 +75,13 @@ def naive(data):
     smallest_distance = None
     points = []
     if n == 2:
-        # if there are only two points return them - O(n)
+        # if there are only two points return them - O(c)
         x1, y1 = data[0]
         x2, y2 = data[1]
         smallest_distance = hypot(x2 - x1, y2 - y1)
         points = [(data[0], data[1])]
     elif n == 3:
-        # if there are only three points return best of three - O(n)
+        # if there are only three points return best of three - O(c)
         x1, y1 = data[0]
         x2, y2 = data[1]
         x3, y3 = data[2]
@@ -105,7 +105,7 @@ def naive(data):
         distance1, points1 = naive(left)
         distance2, points2 = naive(right)
 
-        # combine - O(n)
+        # combine - O(c)
         if distance1 == distance2:
             smallest_distance = distance1
             points = points1 + points2
@@ -135,13 +135,13 @@ def enhanced(data):
     points = []
 
     if n == 2:
-        # if there are only two points return them - O(n)
+        # if there are only two points return them - O(c)
         x1, y1 = data[0]
         x2, y2 = data[1]
         smallest_distance = hypot(x2 - x1, y2 - y1)
         points = [(data[0], data[1])]
     elif n == 3:
-        # if there are only three points return best of three - O(n)
+        # if there are only three points return best of three - O(c)
         x1, y1 = data[0]
         x2, y2 = data[1]
         x3, y3 = data[2]
@@ -156,16 +156,16 @@ def enhanced(data):
         else:
             points = [(data[0], data[2])]
     else:
-        # split data in half - O(n)
-        m = n/2
-        left = data[:m]
-        right = data[m:]
+        # compute seperation line L - O(n log n)
+        mergeSort(data, 0)
+        m = n / 2
+        L = data[m][0]
 
-        # recurse - O(log n)
-        distance1, points1 = enhanced(left)
-        distance2, points2 = enhanced(right)
+        # recurse - 2T(n/2)
+        distance1, points1 = enhanced(data[:m])
+        distance2, points2 = enhanced(data[m:])
 
-        # combine - O(n)
+        # get starting delta - O(c)
         if distance1 == distance2:
             smallest_distance = distance1
             points = points1 + points2
@@ -176,59 +176,52 @@ def enhanced(data):
             smallest_distance = distance1
             points = points1
 
-        # build new list of points close to center
-        new_list = []
-        L = data[m][0]  # x-coordinate of L
-        print "L is at", L
+        # identify all points within delta from L - O(n)
+        M_y = []
         for x, y in data:
             distance = abs(x - L)
             if distance < 2*smallest_distance:
-                new_list.append((x, y))
-                print "point", (x, y), "is", distance, "away from L"
+                M_y.append((x, y))
 
-        mergeSort(new_list, 1)
-        print new_list
-        d_m, ret_points = closest_cross_pair(new_list, smallest_distance)
+        # sort by y - O(n log n)
+        mergeSort(M_y, 1)
 
-        if d_m < smallest_distance:
-            smallest_distance = d_m
-            points = ret_points
-        elif d_m == smallest_distance:
-            points += ret_points
+        # get cross pairs - O(n)
+        smallest_distance, points = closest_cross_pair(M_y, (smallest_distance, points))
 
     return smallest_distance, points
 
 
-def closest_cross_pair(points, delta):
-    d_m = delta
-    m = len(points)
-    ret_points = []
+def closest_cross_pair(data, start):
+    d_m = start[0]
+    points = start[1]
+    m = len(data)
 
     for i in range(0, m-1):
         j = i + 1
-        while (points[j][1] - points[i][1] <= delta):
-            x1, y1 = points[j]
-            x2, y2 = points[i]
+        while data[j][1] - data[i][1] <= d_m:
+            x1, y1 = data[j]
+            x2, y2 = data[i]
             d = hypot(x2 - x1, y2 - y1)
             if d < d_m:
                 d_m = d
-                ret_points = [(points[j], points[i])]
+                points = [(data[i], data[j])]
             elif d == d_m:
-                ret_points += [(points[j], points[i])]
+                if (data[i], data[j]) not in points:
+                    points += [(data[i], data[j])]
 
             if j == m-1:
                 break
             else:
                 j += 1
 
-    return d_m, ret_points
+    return d_m, points
 
 
 # TODO: sort output for printing
 if __name__ == "__main__":
     data = read_input()
 
-    """
     print "----- Brute Force -----"
     output = brute_force(data)
     print output[0]
@@ -240,7 +233,6 @@ if __name__ == "__main__":
     print output[0]
     for pair1, pair2 in output[1]:
         print pair1, pair2
-    """
 
     print "----- Enhanced -----"
     output = enhanced(data)
