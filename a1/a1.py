@@ -218,23 +218,38 @@ def closest_cross_pair(data, start):
     return d_m, points
 
 
+def wrapper(func, *args, **kwargs):
+    def wrapped():
+        return func(*args, **kwargs)
+    return wrapped
+
+
 # TODO: sort output for printing
 if __name__ == "__main__":
     data = read_input()
 
     print "----- Brute Force -----"
+    wrapped = wrapper(brute_force, data)
+    print "Run Time:", timeit.timeit(wrapped, number=1000)/1000
+
     output = brute_force(data)
     print output[0]
     for pair1, pair2 in output[1]:
         print pair1, pair2
 
     print "----- Naive -----"
+    wrapped = wrapper(naive, data)
+    print "Run Time:", timeit.timeit(wrapped, number=1000) / 1000
+
     output = naive(data)
     print output[0]
     for pair1, pair2 in output[1]:
         print pair1, pair2
 
     print "----- Enhanced -----"
+    wrapped = wrapper(enhanced, data)
+    print "Run Time:", timeit.timeit(wrapped, number=1000) / 1000
+
     output = enhanced(data)
     print output[0]
     for pair1, pair2 in output[1]:
