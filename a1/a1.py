@@ -172,7 +172,7 @@ def enhanced(data_x, data_y):
         else:
             points = [(data_x[0], data_x[2])]
     else:
-        # compute seperation line L - O(n log n)
+        # compute seperation line L - O(n)
         m = n / 2
         L = data_x[m][0]
         left_x = data_x[:m]
