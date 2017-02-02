@@ -2,10 +2,11 @@
 from a1 import *
 import timeit
 from random import randint
+from copy import deepcopy
 
-TIME_BRUTE_FORCE = False
-TIME_NAIVE = True
-TIME_ENHANCED = True
+TIME_BRUTE_FORCE = True
+TIME_NAIVE = False
+TIME_ENHANCED = False
 
 brute_force_times = []
 naive_times = []
@@ -48,21 +49,23 @@ if __name__ == "__main__":
             n = len(data)
             print "Running trial", i, "with n", n
 
-            data_x = data
-            data_y = data_x
-
-            mergeSort(data_x, 0)
-            mergeSort(data_y, 1)
-
             if TIME_BRUTE_FORCE:
                 wrapped = wrapper(brute_force, data)
                 brute_force_times.append((n, timeit.timeit(wrapped, number=1)))
 
             if TIME_NAIVE:
+                data_x = deepcopy(data)
+                mergeSort(data_x, 0)
+
                 wrapped = wrapper(naive, data_x)
                 naive_times.append((n, timeit.timeit(wrapped, number=1)))
 
             if TIME_ENHANCED:
+                data_x = deepcopy(data)
+                data_y = deepcopy(data)
+                mergeSort(data_x, 0)
+                mergeSort(data_y, 1)
+
                 wrapped = wrapper(enhanced, data_x, data_y)
                 enhanced_times.append((n, timeit.timeit(wrapped, number=1)))
 
@@ -70,5 +73,6 @@ if __name__ == "__main__":
 
         print_results()
 
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, MemoryError) as e:
+        print e
         print_results()
