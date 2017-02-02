@@ -70,11 +70,16 @@ def brute_force(data):
     return smallest_distance, points
 
 
-# TODO: Specify that data will be sorted by X in docstring
 def naive(data):
+    """
+    Naive divide and conquer algorithm for pre-sorted x
+    :param data: input data sorted by x
+    :return:
+    """
     n = len(data)
     smallest_distance = None
     points = []
+
     if n == 2:
         # if there are only two points return them - O(c)
         x1, y1 = data[0]
@@ -97,76 +102,15 @@ def naive(data):
         else:
             points = [(data[0], data[2])]
     else:
-        # split data in half - O(n)
-        m = n/2
+        # compute separation line L - O(n)
+        m = n / 2
+        L = data[m][0]
         left = data[:m]
         right = data[m:]
 
-        # recurse - O(log n)
+        # recurse - 2T(n/2)
         distance1, points1 = naive(left)
         distance2, points2 = naive(right)
-
-        # combine - O(c)
-        if distance1 == distance2:
-            smallest_distance = distance1
-            points = points1 + points2
-        elif distance1 > distance2:
-            smallest_distance = distance2
-            points = points2
-        elif distance1 < distance2:
-            smallest_distance = distance1
-            points = points1
-
-        # check cross pairs - O((n/2)^2)
-        # TODO: use closest_cross_pair instead
-        for x1, y1 in left:
-            for x2, y2 in right:
-                result = hypot(x2 - x1, y2 - y1)
-                if result < smallest_distance:
-                    smallest_distance = result
-                    points = [((x1, y1), (x2, y2))]
-                elif result == smallest_distance:
-                    points += [((x1, y1), (x2, y2))]
-
-    return smallest_distance, points
-
-
-# TODO: should take two inputs, data sorted by x, and data sorted by y
-def enhanced(data):
-    n = len(data)
-    smallest_distance = None
-    points = []
-
-    if n == 2:
-        # if there are only two points return them - O(c)
-        x1, y1 = data[0]
-        x2, y2 = data[1]
-        smallest_distance = hypot(x2 - x1, y2 - y1)
-        points = [(data[0], data[1])]
-    elif n == 3:
-        # if there are only three points return best of three - O(c)
-        x1, y1 = data[0]
-        x2, y2 = data[1]
-        x3, y3 = data[2]
-        result1 = hypot(x2 - x1, y2 - y1)
-        result2 = hypot(x2 - x3, y2 - y3)
-        result3 = hypot(x1 - x3, y1 - y3)
-        smallest_distance = min(result1, result2, result3)
-        if smallest_distance == result1:
-            points = [(data[0], data[1])]
-        elif smallest_distance == result2:
-            points = [(data[1], data[2])]
-        else:
-            points = [(data[0], data[2])]
-    else:
-        # compute seperation line L - O(n log n)
-        mergeSort(data, 0)
-        m = n / 2
-        L = data[m][0]
-
-        # recurse - 2T(n/2)
-        distance1, points1 = enhanced(data[:m])
-        distance2, points2 = enhanced(data[m:])
 
         # get starting delta - O(c)
         if distance1 == distance2:
@@ -180,17 +124,93 @@ def enhanced(data):
             points = points1
 
         # identify all points within delta from L - O(n)
-        M_y = []
+        m_y = []
         for x, y in data:
             distance = abs(x - L)
-            if distance < 2*smallest_distance:
-                M_y.append((x, y))
+            if distance < 2 * smallest_distance:
+                m_y.append((x, y))
 
         # sort by y - O(n log n)
-        mergeSort(M_y, 1)
+        mergeSort(m_y, 1)
 
         # get cross pairs - O(n)
-        smallest_distance, points = closest_cross_pair(M_y, (smallest_distance, points))
+        smallest_distance, points = closest_cross_pair(m_y, (smallest_distance, points))
+
+    return smallest_distance, points
+
+
+def enhanced(data_x, data_y):
+    """
+    Enhanced divide and conquer algorithm for pre-sorted x and y
+    :param data_x: input data sorted by x
+    :param data_y: input data sorted by y
+    :return:
+    """
+    n = len(data_x)
+    smallest_distance = None
+    points = []
+
+    if n == 2:
+        # if there are only two points return them - O(c)
+        x1, y1 = data_x[0]
+        x2, y2 = data_x[1]
+        smallest_distance = hypot(x2 - x1, y2 - y1)
+        points = [(data_x[0], data_x[1])]
+    elif n == 3:
+        # if there are only three points return best of three - O(c)
+        x1, y1 = data_x[0]
+        x2, y2 = data_x[1]
+        x3, y3 = data_x[2]
+        result1 = hypot(x2 - x1, y2 - y1)
+        result2 = hypot(x2 - x3, y2 - y3)
+        result3 = hypot(x1 - x3, y1 - y3)
+        smallest_distance = min(result1, result2, result3)
+        if smallest_distance == result1:
+            points = [(data_x[0], data_x[1])]
+        elif smallest_distance == result2:
+            points = [(data_x[1], data_x[2])]
+        else:
+            points = [(data_x[0], data_x[2])]
+    else:
+        # compute seperation line L - O(n log n)
+        m = n / 2
+        L = data_x[m][0]
+        left_x = data_x[:m]
+        right_x = data_x[m:]
+
+        # scan and build left_y and right_y based on x coordinate - O(n)
+        left_y = []
+        right_y = []
+        for x, y in data_y:
+            if x < L:
+                left_y.append((x, y))
+            else:
+                right_y.append((x, y))
+
+        # recurse - 2T(n/2)
+        distance1, points1 = enhanced(left_x, left_y)
+        distance2, points2 = enhanced(right_x, right_y)
+
+        # get starting delta - O(c)
+        if distance1 == distance2:
+            smallest_distance = distance1
+            points = points1 + points2
+        elif distance1 > distance2:
+            smallest_distance = distance2
+            points = points2
+        elif distance1 < distance2:
+            smallest_distance = distance1
+            points = points1
+
+        # identify all points in data_y within delta from L - O(n)
+        m_y = []
+        for x, y in data_y:
+            distance = abs(x - L)
+            if distance < 2*smallest_distance:
+                m_y.append((x, y))
+
+        # get cross pairs - O(n)
+        smallest_distance, points = closest_cross_pair(m_y, (smallest_distance, points))
 
     return smallest_distance, points
 
@@ -221,26 +241,28 @@ def closest_cross_pair(data, start):
     return d_m, points
 
 if __name__ == "__main__":
-    data = read_input()
+    data_x = read_input()
+    data_y = data_x
+
+    mergeSort(data_x, 0)
+    mergeSort(data_y, 0)
 
     print "----- Brute Force -----"
-    output = brute_force(data)
+    output = brute_force(data_x)
     points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
     for pair1, pair2 in points:
         print pair1, pair2
 
     print "----- Naive -----"
-    # TODO: Sort data by X
-    output = naive(data)
+    output = naive(data_x)
     points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
     for pair1, pair2 in points:
         print pair1, pair2
 
     print "----- Enhanced -----"
-    # TODO: Sort data by X and Y
-    output = enhanced(data)
+    output = enhanced(data_x, data_y)
     points = sorted(output[1], key=lambda tuple: tuple[0])
     print output[0]
     for pair1, pair2 in points:
