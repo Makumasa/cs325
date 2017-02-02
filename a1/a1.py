@@ -245,7 +245,7 @@ if __name__ == "__main__":
     data_y = data_x
 
     mergeSort(data_x, 0)
-    mergeSort(data_y, 0)
+    mergeSort(data_y, 1)
 
     print "----- Brute Force -----"
     output = brute_force(data_x)

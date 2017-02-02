@@ -10,6 +10,7 @@ if __name__ == "__main__":
 
     filepath = argv[1]
     data = read_input()
+    mergeSort(data, 0)
 
     output = naive(data)
     points = sorted(output[1], key=lambda tuple: tuple[0])
