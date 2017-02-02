@@ -17,4 +17,7 @@ if __name__ == "__main__":
     for pair1, pair2 in points:
         print pair1, pair2
 
-
+    with open("output.bruteforce.txt", 'w') as f:
+        f.write(str(output[0]) + "\n\r")
+        for pair1, pair2 in points:
+            f.write(str(pair1) + " " + str(pair2) + "\n\r")
