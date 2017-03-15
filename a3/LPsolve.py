@@ -1,8 +1,9 @@
+import matplotlib.pyplot as plt
 from pulp import *
 from math import *
 
 with open("Corvallis.csv", 'r') as f:
-    lines = f.readlines(22305)
+    lines = f.readlines()
 
 data_set = []
 for line in lines[1:]:
@@ -20,6 +21,8 @@ for line in lines[1:]:
 
     data_set.append(data_dict)
 
+print len(data_set)
+
 x0 = LpVariable("x0") #0 <= x0
 x1 = LpVariable("x1") #0 <= x1
 x2 = LpVariable("x2") #0 <= x2
@@ -32,20 +35,25 @@ U = LpVariable("U")
 
 prob = LpProblem("MMAD", LpMinimize)
 
+graph_x = []
+graph_y = []
 for data in data_set:
 
    d = int(data["time"])
    avg_temp = float(data["average"])
 
-   prob +=   (x0 + x1 * d + 							#linear trend
-	     x2 * cos(2*pi*d/365.25) + x3 * sin(2*pi*d/365.25) + 		#seasonal pattern
-	     x4 * cos(2*pi*d/(365.25*10.7)) + x5 * sin(2*pi*d/(365.25*10.7))	#solar cycle
-	     - avg_temp) <= U
+   graph_x.append(d)
+   graph_y.append(avg_temp)
+
+   prob += (x0 + x1 * d + 							#linear trend
+            x2 * cos(2*pi*d/365.25) + x3 * sin(2*pi*d/365.25) + 		#seasonal pattern
+            x4 * cos(2*pi*d/(365.25*10.7)) + x5 * sin(2*pi*d/(365.25*10.7))	#solar cycle
+            - avg_temp) <= U
    
-   prob +=  -(x0 + x1 * d + 							#linear trend
-	     x2 * cos(2*pi*d/365.25) + x3 * sin(2*pi*d/365.25) + 		#seasonal pattern
-	     x4 * cos(2*pi*d/(365.25*10.7)) + x5 * sin(2*pi*d/(365.25*10.7))	#solar cycle
-	     - avg_temp) <= U
+   prob += -(x0 + x1 * d + 							#linear trend
+            x2 * cos(2*pi*d/365.25) + x3 * sin(2*pi*d/365.25) + 		#seasonal pattern
+            x4 * cos(2*pi*d/(365.25*10.7)) + x5 * sin(2*pi*d/(365.25*10.7))	#solar cycle
+            - avg_temp) <= U
 
 #Function to minimize
 prob += U
@@ -60,3 +68,18 @@ print value(x2)
 print value(x3)
 print value(x4)
 print value(x5)
+
+plt.scatter(graph_x, graph_y, s=1)
+best_fit_y = []
+best_fit_linear = []
+for d in graph_x:
+    val = abs(value(x0) + value(x1) * d +  # linear trend
+             value(x2) * cos(2 * pi * d / 365.25) + value(x3) * sin(2 * pi * d / 365.25) +  # seasonal pattern
+             value(x4) * cos(2 * pi * d / (365.25 * 10.7)) + value(x5) * sin(2 * pi * d / (365.25 * 10.7)))  # solar cycle
+
+    best_fit_linear.append(value(x0) + value(x1) * d)
+    best_fit_y.append(val)
+
+plt.scatter(graph_x, best_fit_linear, s=1, color="red")
+plt.scatter(graph_x, best_fit_y, s=1, color="green")
+plt.show()
