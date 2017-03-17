@@ -1,7 +1,7 @@
 from pulp import *
 from math import *
 
-with open("Climate/domefuji.csv", 'r') as f:
+with open("Climate/baseorcadas.csv", 'r') as f:
     lines = f.readlines()
 
 data_set = []
