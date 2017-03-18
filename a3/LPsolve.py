@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import matplotlib.pyplot as plt
 from pulp import *
 from math import *
@@ -62,12 +64,15 @@ status = prob.solve()
 LpStatus[status]
 
 #Print the result for a and b:
-print value(x0)
-print value(x1)
-print value(x2)
-print value(x3)
-print value(x4)
-print value(x5)
+print LpStatus[status]
+print "Obejective Value:", value(U)
+print "x0 =", value(x0)
+print "x1 =", value(x1)
+print "x2 =", value(x2)
+print "x3 =", value(x3)
+print "x4 =", value(x4)
+print "x5 =", value(x5)
+
 
 plt.scatter(graph_x, graph_y, s=1)
 best_fit_y = []
@@ -82,4 +87,12 @@ for d in graph_x:
 
 plt.scatter(graph_x, best_fit_linear, s=1, color="red")
 plt.scatter(graph_x, best_fit_y, s=1, color="green")
+plt.xlabel('Days Since May 1, 1952')
+ylabel_string = ''
+ylabel_string += 'Temperature ('
+ylabel_string += u'\u00b0'
+ylabel_string += "C)"
+plt.ylabel(ylabel_string)
+plt.title('Corvallis Temperature vs. Days Since May 1, 1952')
+plt.legend(markerscale=10)
 plt.show()
